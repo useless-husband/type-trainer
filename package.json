@@ -1,0 +1,14 @@
+{
+  "name": "type-trainer",
+  "version": "1.0.0",
+  "description": "Typing practice room: English typing and Zhuyin (Bopomofo) typing, static web app with zero dependencies.",
+  "type": "module",
+  "private": true,
+  "license": "MIT",
+  "scripts": {
+    "test": "node --test \"test/*.test.js\"",
+    "serve": "python3 -m http.server 8000",
+    "build:zh": "uv run --with pypinyin tools/build-zh.py"
+  },
+  "engines": { "node": ">=20" }
+}
