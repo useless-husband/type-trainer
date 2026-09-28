@@ -2,7 +2,7 @@
 
 const W = 560;
 const H = 180;
-const PAD = { l: 40, r: 12, t: 12, b: 24 };
+const PAD = { l: 40, r: 12, t: 24, b: 24 };
 
 function esc(s) {
   return String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
@@ -52,6 +52,6 @@ export function renderLineChart(values, opts = {}) {
   });
   out += `<text class="c-text" x="${PAD.l}" y="${H - 6}">較早</text>`;
   out += `<text class="c-text" x="${W - PAD.r}" y="${H - 6}" text-anchor="end">最近</text>`;
-  if (unit) out += `<text class="c-text" x="${PAD.l}" y="${PAD.t - 2}">${esc(unit)}</text>`;
+  if (unit) out += `<text class="c-text" x="${PAD.l}" y="${PAD.t - 12}">${esc(unit)}</text>`;
   return `${out}</svg>`;
 }

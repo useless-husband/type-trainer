@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>打字練習室</title>
+<meta name="description" content="英打與注音打字練習：即時 WPM、正確率、錯誤按鍵熱圖與弱點練習。">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231d4ed8'/%3E%3Cpath d='M8 11h16M16 11v11' stroke='white' stroke-width='3' fill='none'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<a class="skip" href="#practice">跳到練習區</a>
+
+<header class="site-header">
+  <h1>打字練習室</h1>
+  <p class="sub">英打與注音打字練習。注音直接用大千鍵位按鍵，不用切換輸入法。</p>
+</header>
+
+<main>
+  <section class="controls" aria-label="練習設定">
+    <div class="field">
+      <span class="label" id="lbl-mode">模式</span>
+      <div class="seg" role="radiogroup" aria-labelledby="lbl-mode" id="seg-mode">
+        <button type="button" role="radio" data-mode="en" aria-checked="true">英打</button>
+        <button type="button" role="radio" data-mode="zh" aria-checked="false">注音打字</button>
+        <button type="button" role="radio" data-mode="custom" aria-checked="false">自訂文字</button>
+      </div>
+    </div>
+    <div class="field" id="f-en">
+      <label for="sel-en">題庫</label>
+      <select id="sel-en">
+        <option value="words">常用單字</option>
+        <option value="sentences">英文句子</option>
+        <option value="code">程式碼片段</option>
+      </select>
+    </div>
+    <div class="field" id="f-zh" hidden>
+      <label for="sel-topic">主題</label>
+      <select id="sel-topic"></select>
+    </div>
+    <div class="field">
+      <label for="sel-strict">錯字處理</label>
+      <select id="sel-strict">
+        <option value="strict">必須打對才能前進</option>
+        <option value="loose">可以繼續，最後統計</option>
+      </select>
+    </div>
+    <div class="actions">
+      <button type="button" class="btn primary" id="btn-new">換一組題目</button>
+      <button type="button" class="btn" id="btn-weak">弱點練習</button>
+    </div>
+  </section>
+
+  <section class="custom" id="custom-box" hidden>
+    <label for="custom-text">貼上要練習的英文段落</label>
+    <textarea id="custom-text" rows="4" spellcheck="false" placeholder="例如：The quick brown fox jumps over the lazy dog."></textarea>
+    <div class="custom-row">
+      <button type="button" class="btn primary" id="btn-custom">用這段文字練習</button>
+      <span class="hint" id="custom-note">最多 2000 字元；彎引號會換成直引號，打不出來的字元會被移除。</span>
+    </div>
+  </section>
+
+  <section class="stats" aria-label="即時統計">
+    <div class="stat"><span class="stat-label" id="lbl-speed">速度</span><span class="stat-value" id="st-speed">0</span><span class="stat-unit" id="st-unit">WPM</span></div>
+    <div class="stat"><span class="stat-label">正確率</span><span class="stat-value" id="st-acc">100</span><span class="stat-unit">%</span></div>
+    <div class="stat"><span class="stat-label">時間</span><span class="stat-value" id="st-time">0:00</span></div>
+    <div class="stat stat-progress">
+      <span class="stat-label">進度</span>
+      <div class="bar" role="progressbar" aria-label="進度" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="st-bar"><div class="bar-fill" id="st-fill"></div></div>
+      <span class="stat-unit" id="st-prog">0 / 0</span>
+    </div>
+  </section>
+
+  <section class="practice" id="practice" tabindex="0" aria-label="打字練習區，點一下這裡再開始打字。Esc 重來，Tab 離開。">
+    <div class="text" id="text" lang="en"></div>
+    <div class="compose" id="compose-row" hidden>
+      <span class="compose-label">打出的注音</span>
+      <span class="compose-value" id="compose" aria-hidden="true"></span>
+    </div>
+    <input class="mobile-input" id="mobile-input" type="text" inputmode="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" aria-label="行動裝置輸入欄" tabindex="-1">
+    <div class="focus-hint" id="focus-hint">點一下這裡，再開始打字</div>
+  </section>
+  <p class="next-line" id="next-line" aria-live="off"></p>
+
+  <section class="result" id="result" hidden aria-labelledby="result-title">
+    <h2 id="result-title">這次的結果</h2>
+    <dl class="result-grid">
+      <div><dt id="r-speed-label">速度</dt><dd id="r-speed"></dd></div>
+      <div><dt>正確率</dt><dd id="r-acc"></dd></div>
+      <div><dt>時間</dt><dd id="r-time"></dd></div>
+      <div><dt id="r-chars-label">打對字數</dt><dd id="r-chars"></dd></div>
+      <div><dt>錯誤按鍵</dt><dd id="r-err"></dd></div>
+    </dl>
+    <p class="result-weak" id="r-weak"></p>
+    <div class="actions">
+      <button type="button" class="btn primary" id="btn-again">再練一次（Enter）</button>
+      <button type="button" class="btn" id="btn-weak2">用弱點練習</button>
+    </div>
+  </section>
+
+  <section class="keyboard-card" aria-label="虛擬鍵盤">
+    <div class="kb-head">
+      <div class="seg small" role="radiogroup" aria-label="鍵盤顯示方式" id="seg-view">
+        <button type="button" role="radio" data-view="finger" aria-checked="true">手指顏色</button>
+        <button type="button" role="radio" data-view="heat" aria-checked="false">錯誤熱圖</button>
+      </div>
+      <span class="hint" id="view-note"></span>
+    </div>
+    <div class="kb" id="kb"></div>
+    <ul class="legend" id="legend" aria-label="手指顏色對照"></ul>
+    <div class="heat-legend" id="heat-legend" hidden>
+      <span>錯得少</span>
+      <span class="hl hl1"></span><span class="hl hl2"></span><span class="hl hl3"></span><span class="hl hl4"></span><span class="hl hl5"></span>
+      <span>錯得多（鍵上的數字是錯誤次數）</span>
+    </div>
+  </section>
+
+  <section class="history" aria-labelledby="history-title">
+    <div class="history-head">
+      <h2 id="history-title">歷史紀錄</h2>
+      <button type="button" class="btn small" id="btn-clear">清除紀錄</button>
+    </div>
+    <p class="hint" id="history-note"></p>
+    <div class="charts">
+      <figure><figcaption id="cap-speed">速度</figcaption><div id="chart-speed"></div></figure>
+      <figure><figcaption>正確率（%）</figcaption><div id="chart-acc"></div></figure>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <p>資料只存在你的瀏覽器（localStorage），不會上傳。<a href="https://github.com/useless-husband/type-trainer">原始碼</a>（MIT 授權）</p>
+</footer>
+
+<script type="module" src="src/ui/app.js"></script>
+</body>
+</html>
